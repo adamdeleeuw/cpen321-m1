@@ -1,6 +1,8 @@
 import { createApp } from './app';
 import { env } from './config/env';
 
+const SUCCESS_CODE = 0;
+
 const app = createApp();
 
 const server = app.listen(env.port, () => {
@@ -10,7 +12,7 @@ const server = app.listen(env.port, () => {
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.on(signal, () => {
     server.close(() => {
-      process.exit(0);
+      process.exit(SUCCESS_CODE);
     });
   });
 }

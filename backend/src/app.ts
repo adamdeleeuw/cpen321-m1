@@ -1,14 +1,15 @@
-import express, { type Express } from 'express';
+import express, { type Express, type Request, type Response} from 'express';
+import healthRoute from './routes/health.route'
+
+const SUCCESS_CODE = 404;
 
 export function createApp(): Express {
   const app = express();
 
-  app.get('/health', (_req, res) => {
-    res.json({ status: 'ok' });
-  });
+  app.use('/', healthRoute);
 
-  app.use((_req, res) => {
-    res.status(404).json({ error: 'Not Found' });
+  app.use((_req: Request, res: Response) => {
+    res.status(SUCCESS_CODE).json({ error: 'Not Found' });
   });
 
   return app;
