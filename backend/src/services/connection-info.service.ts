@@ -1,12 +1,16 @@
 /**
  * This service provides APIs for:
  * - Server public IP
- * - Serve local time
- * - Client IP
+ * - Server local time
  */
+import { type Request } from 'express';
 
 export function getPublicServerIp(): string | undefined {
     return process.env.SERVER_PUBLIC_IP;
+}
+
+export function getPublicClientIP(req: Request): string | undefined {
+    return req.ip;
 }
 
 function formatTimeFromElements(timeElements: Intl.DateTimeFormatPart[]): string {
