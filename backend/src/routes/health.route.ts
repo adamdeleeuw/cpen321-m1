@@ -1,7 +1,7 @@
-import express, { type Router} from 'express';
+import express from 'express';
 import {getHealth} from '../controllers/health.controller';
 
-const router: Router = express.Router(); 
+const router = express.Router(); 
 
 router.get('/', getHealth);
 
