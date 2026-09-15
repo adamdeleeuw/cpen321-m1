@@ -10,8 +10,8 @@ export function getConnectionInfo(req: Request, res: Response) {
     // use 'UTC' as fallback in case the req.timZone object is undefined or has an unexpected type
     const clientTimeZone = typeof req.query.timeZone === 'string' ? req.query.timeZone : 'UTC'
 
-    if (!getPublicServerIp()) throw new Error('');
-    if (!getPublicClientIP(req)) throw new Error('');
+    if (!getPublicServerIp()) throw new Error('Public Server IP is undefined');
+    if (!getPublicClientIP(req)) throw new Error('Public Client IP is undefined');
 
     res.status(OK).json({
         serverIp: getPublicServerIp(), // should add a check?
