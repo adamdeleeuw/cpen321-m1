@@ -9,9 +9,10 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 /**
- * spec: thin http client for the backend. all calls run on Dispatchers.IO.
+ * spec: http client for the backend. all calls run on Dispatchers.IO.
  * - signInWithGoogle: POST /api/auth/google, trades a google id token for a session.
  * - getMyName: GET /api/my-name with the session token (protected route).
+ * - getConnectionInfo: GET /api/connection-info with the session token (protected route).
  * errors: InvalidCredentialsException (401 on sign-in), UnauthorizedException
  * (401 on protected route), IOException (network / other http errors).
  */
@@ -85,7 +86,8 @@ object BackendApi {
         )
     }
 
-    // returns (status code, body); body is the error stream for non-2xx
+    // returns (status code, body)
+    // body is the error stream for non-2xx
     private suspend fun request(
         method: String,
         path: String,

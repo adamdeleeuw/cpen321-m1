@@ -10,7 +10,8 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 
 /**
  * spec: runs the google account picker (Credential Manager) and returns a
- * google id token. throws androidx.credentials.exceptions.GetCredentialException
+ * google id token
+ * throws androidx.credentials.exceptions.GetCredentialException
  * if the user cancels or no account is available.
  * note: BuildConfig.GOOGLE_CLIENT_ID must be the web/backend client id (the
  * same value as the backend's GOOGLE_BACKEND_CLIENT_ID), not the android one.
