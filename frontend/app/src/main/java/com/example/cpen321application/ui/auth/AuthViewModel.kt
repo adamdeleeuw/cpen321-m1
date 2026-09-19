@@ -43,12 +43,6 @@ class AuthViewModel : ViewModel() {
 
     val sessionToken: String? get() = if (isSignedIn) session?.token else null
 
-    val statusText: String
-        get() = session
-            ?.takeIf { isSignedIn }
-            ?.let { "Signed in as ${it.user.firstName} ${it.user.lastName}" }
-            ?: "Not authenticated"
-
     fun signIn(context: Context) {
         if (isLoading) return
         isLoading = true

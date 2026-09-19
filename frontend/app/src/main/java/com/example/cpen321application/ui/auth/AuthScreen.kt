@@ -21,7 +21,6 @@ fun AuthScreen(viewModel: AuthViewModel, modifier: Modifier = Modifier) {
     val context = LocalContext.current // activity context, needed to show the google picker
 
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = "Auth Status: ${viewModel.statusText}")
 
         Button(
             onClick = {
