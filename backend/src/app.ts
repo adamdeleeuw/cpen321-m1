@@ -11,7 +11,7 @@ export function createApp(): Express {
 
   app.use(express.json());   // middleware: allows for defined req.body access
 
-  app.use('/', healthRoute);
+  app.use('/health', healthRoute);
   app.use('/api/auth', authRoute);
   app.use('/api/my-name', myNameRoute);
   app.use('/api/connection-info', connectionInfoRoute);
