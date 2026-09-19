@@ -1,7 +1,9 @@
 import { createApp } from './app';
-import { env } from './config/env';
+import { assertAuthEnv, env } from './config/env';
 
 const SUCCESS_CODE = 0;
+
+assertAuthEnv(); // fail fast if google/jwt config is missing
 
 const app = createApp();
 

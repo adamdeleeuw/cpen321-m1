@@ -1,38 +1,51 @@
 /**
- * Authenticates the client's ID Token
- * Note: Google uses OAuth2Client as the universal client for both
- *       OAuth2 (authorization) and OpenID Connect (OIDC) (authentication).
- *       This app uses it for the latter.
+ * spec: google sign-in logic.
+ * - verifyGoogleIdToken: asks google to validate an id token (signature,
+ *   expiry, issuer, audience == our client id) and returns its payload.
+ * - authenticateWithGoogle: verify token -> find/create user -> issue session.
+ * note: OAuth2Client is google's client for both oauth2 and OIDC; we only use
+ * it for OIDC id-token verification.
  */
+import { OAuth2Client, type TokenPayload } from 'google-auth-library';
+import { env } from '../config/env';
+import { findOrCreateUser } from './user.service';
+import { issueSessionToken } from './session.service';
+import type { User } from '../types/user';
 
-import {OAuth2Client, TokenPayload} from 'google-auth-library';
-import dotenv from 'dotenv';
-
-dotenv.config({path: '.env.dev'});
-
-const tryClientId = process.env.GOOGLE_BACKEND_CLIENT_ID;
-if (!tryClientId) {
-    throw new Error('GOOGLE_BACKEND_CLIENT_ID is not defined');
-}
-
-// Guaranteed string (aka guaranteed that a client id exists and TS is knows it)
-const clientId: string = tryClientId;
-
-// clientId checked so we know the client exists
-// If the constructor fails JS throws an exception which stops the program (fair)
-const client = new OAuth2Client(clientId);
+// created lazily so a missing env var doesn't crash on import
+let client: OAuth2Client | undefined;
 
 export async function verifyGoogleIdToken(token: string): Promise<TokenPayload> {
-    const ticket = await client.verifyIdToken({
-        idToken: token,
-        audience: clientId,
-    });
+  client ??= new OAuth2Client(env.googleClientId);
 
-    const payload = ticket.getPayload();
-    if (!payload) {
-        throw new Error('Google token does not have a payload');
-    }
+  const ticket = await client.verifyIdToken({
+    idToken: token,
+    audience: env.googleClientId,
+  });
 
-    return payload;
+  const payload = ticket.getPayload();
+  if (!payload) {
+    throw new Error('Google token does not have a payload');
+  }
+  return payload;
 }
 
+export interface AuthResult {
+  sessionToken: string;
+  expiresIn: number; // seconds
+  isNewUser: boolean;
+  user: User;
+}
+
+/** throws if the google token is invalid. */
+export async function authenticateWithGoogle(idToken: string): Promise<AuthResult> {
+  const payload = await verifyGoogleIdToken(idToken);
+  const { user, isNewUser } = findOrCreateUser(payload);
+
+  return {
+    sessionToken: issueSessionToken(user.id),
+    expiresIn: env.sessionTtlSeconds,
+    isNewUser,
+    user,
+  };
+}
