@@ -23,6 +23,8 @@ import com.example.cpen321application.ui.auth.ConnectionInfoScreen
 import com.example.cpen321application.ui.auth.ConnectionInfoViewModel
 import com.example.cpen321application.ui.timer.TimerButton
 import com.example.cpen321application.ui.timer.TimerViewModel
+import com.example.cpen321application.ui.websocket.WebSocketButton
+import com.example.cpen321application.ui.websocket.WebSocketViewModel
 
 /**
  * spec: root screen. HOME has 3 buttons (auth, websocket, timer); signing in
@@ -34,6 +36,7 @@ fun MainScreen(
     viewModel: MainViewModel,
     authViewModel: AuthViewModel,
     timerViewModel: TimerViewModel,
+    webSocketViewModel: WebSocketViewModel,
     connectionInfoViewModel: ConnectionInfoViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -59,7 +62,7 @@ fun MainScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(text = "Socket Status: ${viewModel.socketStatus}")
+                Text(text = "Socket Status: ${webSocketViewModel.socketStatus}")
                 Text(text = "Timer Running: ${timerViewModel.timerRunning}")
 
                 Spacer(modifier = Modifier.height(32.dp))
@@ -68,16 +71,7 @@ fun MainScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                Button(
-                    onClick = { viewModel.webSocket() },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Connect to WebSocket",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
+                WebSocketButton(viewModel = webSocketViewModel)
 
                 Spacer(modifier = Modifier.height(32.dp))
 

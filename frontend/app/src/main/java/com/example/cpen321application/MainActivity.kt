@@ -19,11 +19,13 @@ import com.example.cpen321application.ui.home.MainViewModel
 import com.example.cpen321application.ui.auth.AuthViewModel
 import com.example.cpen321application.ui.auth.ConnectionInfoViewModel
 import com.example.cpen321application.ui.timer.TimerViewModel
+import com.example.cpen321application.ui.websocket.WebSocketViewModel
 
 class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
     private val authViewModel: AuthViewModel by viewModels()
     private val timerViewModel: TimerViewModel by viewModels()
+    private val webSocketViewModel: WebSocketViewModel by viewModels()
     private val connectionInfoViewModel: ConnectionInfoViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +38,7 @@ class MainActivity : ComponentActivity() {
                         viewModel = viewModel,
                         authViewModel = authViewModel,
                         timerViewModel = timerViewModel,
+                        webSocketViewModel = webSocketViewModel,
                         connectionInfoViewModel = connectionInfoViewModel,
                         modifier = Modifier.padding(innerPadding)
                         )

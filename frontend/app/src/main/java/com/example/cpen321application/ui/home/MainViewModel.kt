@@ -10,11 +10,4 @@ enum class Screen { HOME, AUTH }
 
 class MainViewModel : ViewModel() {
     var screen by mutableStateOf(Screen.HOME)
-
-    var socketStatus by mutableStateOf("Not connected")
-        private set
-
-    fun webSocket() {
-        socketStatus = "socketing"
-    }
 }
