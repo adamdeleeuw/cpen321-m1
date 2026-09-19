@@ -10,7 +10,8 @@ export function getPublicServerIp(): string | undefined {
 }
 
 export function getPublicClientIP(req: Request): string | undefined {
-    return req.ip;
+    // strip the IPv4-mapped IPv6 prefix to display clean IPv4 addr
+    return req.ip?.replace(/^::ffff:/i, '');
 }
 
 function formatTimeFromElements(timeElements: Intl.DateTimeFormatPart[]): string {
@@ -32,6 +33,7 @@ export function getLocalServerTime(): string {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
+        hourCycle: 'h23',
         timeZoneName: 'longOffset'
     }).formatToParts(new Date());
 
