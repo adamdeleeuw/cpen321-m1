@@ -75,12 +75,6 @@ class AuthViewModel : ViewModel() {
         errorMessage = null
     }
 
-    fun requireSignIn(): Boolean {
-        if (isSignedIn) return true
-        notice = SIGN_IN_REQUIRED_MESSAGE
-        return false
-    }
-
     fun onUnauthorized() {
         session = null
         notice = SIGN_IN_REQUIRED_MESSAGE

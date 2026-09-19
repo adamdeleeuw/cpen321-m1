@@ -66,7 +66,7 @@ fun MainScreen(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
-                    onClick = { if (authViewModel.requireSignIn()) viewModel.webSocket() },
+                    onClick = { viewModel.webSocket() },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
@@ -79,7 +79,7 @@ fun MainScreen(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
-                    onClick = { if (authViewModel.requireSignIn()) viewModel.timer() },
+                    onClick = { viewModel.timer() },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
