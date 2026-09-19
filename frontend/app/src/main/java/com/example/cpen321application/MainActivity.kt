@@ -14,11 +14,15 @@ import java.net.URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.activity.viewModels
-import com.example.cpen321application.ui.screens.MainScreen
-import com.example.cpen321application.ui.views.MainViewModel
+import com.example.cpen321application.ui.home.MainScreen
+import com.example.cpen321application.ui.home.MainViewModel
+import com.example.cpen321application.ui.auth.AuthViewModel
+import com.example.cpen321application.ui.auth.ConnectionInfoViewModel
 
 class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
+    private val authViewModel: AuthViewModel by viewModels()
+    private val connectionInfoViewModel: ConnectionInfoViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +32,8 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     MainScreen(
                         viewModel = viewModel,
+                        authViewModel = authViewModel,
+                        connectionInfoViewModel = connectionInfoViewModel,
                         modifier = Modifier.padding(innerPadding)
                         )
                 }
@@ -36,6 +42,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// unused, but leave for now since health route still exists in the backend
 private suspend fun fetchHealthStatus(apiBaseUrl: String): String = withContext(Dispatchers.IO) {
     val healthUrl = "${apiBaseUrl.trimEnd('/')}/health"
     try {
