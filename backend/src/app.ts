@@ -8,6 +8,7 @@ const NOT_FOUND = 404;
 
 export function createApp(): Express {
   const app = express();
+  app.set('trust proxy', 'loopback'); // trust 127.0.0.1/::1 (where Caddy proxy sits)
 
   // middleware: allows for defined req.body access
   app.use(express.json());

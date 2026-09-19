@@ -12,3 +12,5 @@ coverage/
 
 #Ignore vscode AI rules
 .codacy/
+certs/
+*.pem

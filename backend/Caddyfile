@@ -1,0 +1,4 @@
+:3443 {
+    tls ./certs/dev-cert.pem ./certs/dev-key.pem
+    reverse_proxy 127.0.0.1:3000
+}
