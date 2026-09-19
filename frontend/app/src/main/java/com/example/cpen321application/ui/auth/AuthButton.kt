@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.sp
  * sign-in/sign-up (or sign-out) button, and any sign-in error.
  */
 @Composable
-fun AuthScreen(viewModel: AuthViewModel, modifier: Modifier = Modifier) {
+fun AuthButton(viewModel: AuthViewModel, modifier: Modifier = Modifier) {
     val context = LocalContext.current // activity context, needed to show the google picker
 
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {

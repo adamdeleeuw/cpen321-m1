@@ -14,14 +14,7 @@ class MainViewModel : ViewModel() {
     var socketStatus by mutableStateOf("Not connected")
         private set
 
-    var timerRunning by mutableStateOf(false)
-        private set
-
     fun webSocket() {
         socketStatus = "socketing"
-    }
-
-    fun timer() {
-        timerRunning = true
     }
 }

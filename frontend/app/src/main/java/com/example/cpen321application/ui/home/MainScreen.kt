@@ -17,10 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.cpen321application.ui.auth.AuthScreen
+import com.example.cpen321application.ui.auth.AuthButton
 import com.example.cpen321application.ui.auth.AuthViewModel
 import com.example.cpen321application.ui.auth.ConnectionInfoScreen
 import com.example.cpen321application.ui.auth.ConnectionInfoViewModel
+import com.example.cpen321application.ui.timer.TimerButton
+import com.example.cpen321application.ui.timer.TimerViewModel
 
 /**
  * spec: root screen. HOME has 3 buttons (auth, websocket, timer); signing in
@@ -31,6 +33,7 @@ import com.example.cpen321application.ui.auth.ConnectionInfoViewModel
 fun MainScreen(
     viewModel: MainViewModel,
     authViewModel: AuthViewModel,
+    timerViewModel: TimerViewModel,
     connectionInfoViewModel: ConnectionInfoViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -57,11 +60,11 @@ fun MainScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(text = "Socket Status: ${viewModel.socketStatus}")
-                Text(text = "Timer Running: ${viewModel.timerRunning}")
+                Text(text = "Timer Running: ${timerViewModel.timerRunning}")
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                AuthScreen(viewModel = authViewModel)
+                AuthButton(viewModel = authViewModel)
 
                 Spacer(modifier = Modifier.height(32.dp))
 
@@ -78,16 +81,7 @@ fun MainScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                Button(
-                    onClick = { viewModel.timer() },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Start Timer",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
+                TimerButton(viewModel = timerViewModel)
             }
         }
 
