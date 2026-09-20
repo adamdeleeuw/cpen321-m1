@@ -11,8 +11,8 @@ import org.json.JSONObject
 /**
  * spec: http client for the backend. all calls run on Dispatchers.IO.
  * - signInWithGoogle: POST /api/auth/google, trades a google id token for a session.
- * - getMyName: GET /api/my-name with the session token (protected route).
- * - getConnectionInfo: GET /api/connection-info with the session token (protected route).
+ * - getMyName: GET /api/my-name with the session token.
+ * - getConnectionInfo: GET /api/connection-info with the session token.
  * errors: InvalidCredentialsException (401 on sign-in), UnauthorizedException
  * (401 on protected route), IOException (network / other http errors).
  */
