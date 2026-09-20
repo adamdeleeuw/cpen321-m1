@@ -39,15 +39,17 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CPEN321ApplicationTheme {
-                // both the dark pages and the home watercolour run edge to edge, behind the system bars
+                // both the dark pages and the watercolour run edge to edge, behind the system bars
                 val darkPage = viewModel.screen == Screen.TIMER || timerViewModel.finished
-                val home = viewModel.screen == Screen.HOME && !timerViewModel.finished
+                // the wash carries the auth page too, so it reads as part of the home screen
+                val washed = !timerViewModel.finished &&
+                    (viewModel.screen == Screen.HOME || viewModel.screen == Screen.AUTH)
 
                 Scaffold(
-                    modifier = Modifier.fillMaxSize().let { if (home) it.watercolorWash() else it },
+                    modifier = Modifier.fillMaxSize().let { if (washed) it.watercolorWash() else it },
                     containerColor = when {
                         darkPage -> Color.Black
-                        home -> Color.Transparent // the wash behind the Scaffold shows through
+                        washed -> Color.Transparent // the wash behind the Scaffold shows through
                         else -> MaterialTheme.colorScheme.background
                     }
                 ) { innerPadding ->

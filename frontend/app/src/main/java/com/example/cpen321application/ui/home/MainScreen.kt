@@ -29,7 +29,8 @@ import com.example.cpen321application.ui.websocket.WebSocketViewModel
 
 /**
  * spec: root screen. HOME has 3 buttons (auth, websocket, timer); signing in
- * navigates to the AUTH page (connection info), signing out or a 401 returns home.
+ * navigates to the AUTH page (connection info), which shares the home watercolour wash,
+ * and signing out or a 401 returns home.
  * the websocket button opens the WEBSOCKET page (live pixel canvas) and connects;
  * its Back button disconnects and returns home. the timer button opens the TIMER page.
  * when the timer finishes, the penalty challenge takes over the whole screen, wherever the
@@ -51,10 +52,13 @@ fun MainScreen(
         viewModel.screen = if (authViewModel.isSignedIn) Screen.AUTH else Screen.HOME
     }
 
-    // the home wash is light in either system theme, so its text can't take the theme's colours
-    val onWatercolor = viewModel.screen == Screen.HOME && !timerViewModel.finished
+    // the wash is light in either system theme, so text over it can't take the theme's colours
+    val onWatercolor = !timerViewModel.finished &&
+        (viewModel.screen == Screen.HOME || viewModel.screen == Screen.AUTH)
 
     Column(modifier = modifier.fillMaxSize()) {
+        if (onWatercolor) DarkSystemBarIcons()
+
         if (timerViewModel.finished) {
             PenaltyScreen(
                 viewModel = penaltyViewModel,
@@ -88,8 +92,6 @@ fun MainScreen(
                 modifier = Modifier.weight(1f)
             )
         } else {
-            DarkSystemBarIcons()
-
             Column(
                 modifier = Modifier
                     .weight(1f)
