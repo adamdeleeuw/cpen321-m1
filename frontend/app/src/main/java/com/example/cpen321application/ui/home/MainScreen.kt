@@ -53,8 +53,7 @@ fun MainScreen(
     }
 
     // the wash is light in either system theme, so text over it can't take the theme's colours
-    val onWatercolor = !timerViewModel.finished &&
-        (viewModel.screen == Screen.HOME || viewModel.screen == Screen.AUTH)
+    val onWatercolor = !timerViewModel.finished && viewModel.screen.onWatercolor
 
     Column(modifier = modifier.fillMaxSize()) {
         if (onWatercolor) DarkSystemBarIcons()

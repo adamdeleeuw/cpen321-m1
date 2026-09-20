@@ -15,16 +15,18 @@ import kotlinx.coroutines.launch
 
 const val GRID_SIZE = 16
 
+/** spec: the connection's state. the page turns it into the words and colour it shows. */
+enum class SocketStatus { Idle, Connecting, Connected, Disconnected }
+
 /**
  * spec: state for the live pixel canvas. connect() clears the grid and paints one
  * cell per update from the backend stream; disconnect() stops listening. the grid
- * is row-major (index = y * GRID_SIZE + x). socketStatus is one of Not connected,
- * Connecting..., Connected, Disconnected.
+ * is row-major (index = y * GRID_SIZE + x).
  */
 class WebSocketViewModel : ViewModel() {
     val grid = mutableStateListOf<Color>().apply { repeat(GRID_SIZE * GRID_SIZE) { add(BLANK) } }
 
-    var socketStatus by mutableStateOf("Not connected")
+    var socketStatus by mutableStateOf(SocketStatus.Idle)
         private set
 
     private var stream: Job? = null
@@ -32,23 +34,24 @@ class WebSocketViewModel : ViewModel() {
     fun connect() {
         stream?.cancel()
         grid.indices.forEach { grid[it] = BLANK }
-        socketStatus = "Connecting..."
+        socketStatus = SocketStatus.Connecting
         stream = viewModelScope.launch {
             PixelStream.connect()
                 .catch { } // a failed connection ends the stream just like a server close
                 .collect { event ->
                     when (event) {
-                        PixelEvent.Opened -> socketStatus = "Connected"
+                        PixelEvent.Opened -> socketStatus = SocketStatus.Connected
                         is PixelEvent.Update -> paint(event)
                     }
                 }
-            socketStatus = "Disconnected" // not reached on cancel, so disconnect() keeps its own status
+            // not reached on cancel, so disconnect() keeps its own status
+            socketStatus = SocketStatus.Disconnected
         }
     }
 
     fun disconnect() {
         stream?.cancel()
-        socketStatus = "Not connected"
+        socketStatus = SocketStatus.Idle
     }
 
     private fun paint(update: PixelEvent.Update) {

@@ -11,6 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.example.cpen321application.ui.home.Screen
+import com.example.cpen321application.ui.home.onWatercolor
 import com.example.cpen321application.ui.home.watercolorWash
 import com.example.cpen321application.ui.theme.CPEN321ApplicationTheme
 import java.net.HttpURLConnection
@@ -41,9 +42,8 @@ class MainActivity : ComponentActivity() {
             CPEN321ApplicationTheme {
                 // both the dark pages and the watercolour run edge to edge, behind the system bars
                 val darkPage = viewModel.screen == Screen.TIMER || timerViewModel.finished
-                // the wash carries the auth page too, so it reads as part of the home screen
-                val washed = !timerViewModel.finished &&
-                    (viewModel.screen == Screen.HOME || viewModel.screen == Screen.AUTH)
+                // the wash carries the auth and websocket pages, so they read as part of home
+                val washed = !timerViewModel.finished && viewModel.screen.onWatercolor
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize().let { if (washed) it.watercolorWash() else it },

@@ -18,18 +18,22 @@ import androidx.compose.ui.unit.sp
 
 private val ButtonShape = RoundedCornerShape(22.dp)
 private val ButtonPadding = PaddingValues(horizontal = 24.dp, vertical = 18.dp)
+private val CompactPadding = PaddingValues(horizontal = 12.dp, vertical = 18.dp)
 private val ButtonLift = 10.dp
 
 /**
  * spec: the shared home page button. a flat chocolate-brown fill under crisp white text, with
  * the same corners, padding and soft shadow on every one of them so they read as a set.
+ * `compact` keeps all of that but pulls the sides in and sizes the button to its own text,
+ * for pages where a full-width button would take over.
  */
 @Composable
 internal fun HomeButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    compact: Boolean = false
 ) {
     val fill = if (enabled) HomeColors.Button else HomeColors.ButtonDisabled
 
@@ -37,7 +41,7 @@ internal fun HomeButton(
         onClick = onClick,
         enabled = enabled,
         shape = ButtonShape,
-        contentPadding = ButtonPadding,
+        contentPadding = if (compact) CompactPadding else ButtonPadding,
         elevation = null, // the shadow is drawn below instead, so it follows the fill
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent,
@@ -46,7 +50,7 @@ internal fun HomeButton(
             disabledContentColor = HomeColors.OnButton.copy(alpha = 0.75f)
         ),
         modifier = modifier
-            .fillMaxWidth()
+            .then(if (compact) Modifier else Modifier.fillMaxWidth())
             .shadow(
                 elevation = if (enabled) ButtonLift else 0.dp,
                 shape = ButtonShape,
