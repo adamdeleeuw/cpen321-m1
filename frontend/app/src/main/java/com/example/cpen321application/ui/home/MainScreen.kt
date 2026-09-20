@@ -21,6 +21,8 @@ import com.example.cpen321application.ui.auth.AuthButton
 import com.example.cpen321application.ui.auth.AuthViewModel
 import com.example.cpen321application.ui.auth.ConnectionInfoScreen
 import com.example.cpen321application.ui.auth.ConnectionInfoViewModel
+import com.example.cpen321application.ui.penalty.PenaltyScreen
+import com.example.cpen321application.ui.penalty.PenaltyViewModel
 import com.example.cpen321application.ui.timer.TimerButton
 import com.example.cpen321application.ui.timer.TimerScreen
 import com.example.cpen321application.ui.timer.TimerViewModel
@@ -33,6 +35,8 @@ import com.example.cpen321application.ui.websocket.WebSocketViewModel
  * navigates to the AUTH page (connection info), signing out or a 401 returns home.
  * the websocket button opens the WEBSOCKET page (live pixel canvas) and connects;
  * its Back button disconnects and returns home. the timer button opens the TIMER page.
+ * when the timer finishes, the penalty challenge takes over the whole screen, wherever the
+ * user is, until the crossbar is hit; then the TIMER page shows again.
  * the "ATTENTION" notice is pinned to the bottom after an unauthorized attempt.
  */
 @Composable
@@ -40,6 +44,7 @@ fun MainScreen(
     viewModel: MainViewModel,
     authViewModel: AuthViewModel,
     timerViewModel: TimerViewModel,
+    penaltyViewModel: PenaltyViewModel,
     webSocketViewModel: WebSocketViewModel,
     connectionInfoViewModel: ConnectionInfoViewModel,
     modifier: Modifier = Modifier
@@ -50,7 +55,17 @@ fun MainScreen(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
-        if (viewModel.screen == Screen.AUTH && authViewModel.isSignedIn) {
+        if (timerViewModel.finished) {
+            PenaltyScreen(
+                viewModel = penaltyViewModel,
+                onDone = {
+                    penaltyViewModel.reset()
+                    timerViewModel.acknowledge()
+                    viewModel.screen = Screen.TIMER
+                },
+                modifier = Modifier.weight(1f)
+            )
+        } else if (viewModel.screen == Screen.AUTH && authViewModel.isSignedIn) {
             ConnectionInfoScreen(
                 authViewModel = authViewModel,
                 viewModel = connectionInfoViewModel,

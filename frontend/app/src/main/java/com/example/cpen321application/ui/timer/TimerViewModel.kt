@@ -16,7 +16,8 @@ import kotlinx.coroutines.launch
  * spec: state for the timer page. the user picks hours/minutes/seconds; start() counts
  * down from that duration and cancel() stops it. the countdown is measured against the
  * monotonic clock, so it stays accurate while the page is closed or the app is backgrounded.
- * when it reaches zero the timer returns to the picker (the surprise hooks in here later).
+ * when it reaches zero the timer returns to the picker and raises `finished`, which sends the
+ * user to the penalty challenge; acknowledge() clears it once the challenge is beaten.
  */
 class TimerViewModel : ViewModel() {
     var hours by mutableIntStateOf(0)
@@ -28,6 +29,9 @@ class TimerViewModel : ViewModel() {
     var totalMillis by mutableLongStateOf(0L)
         private set
     var remainingMillis by mutableLongStateOf(0L)
+        private set
+
+    var finished by mutableStateOf(false)
         private set
 
     val canStart: Boolean get() = hours + minutes + seconds > 0
@@ -46,12 +50,17 @@ class TimerViewModel : ViewModel() {
                 remainingMillis = (endsAt - SystemClock.elapsedRealtime()).coerceAtLeast(0L)
             }
             running = false
+            finished = true
         }
     }
 
     fun cancel() {
         countdown?.cancel()
         running = false
+    }
+
+    fun acknowledge() {
+        finished = false
     }
 
     private companion object {

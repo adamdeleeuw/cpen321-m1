@@ -21,6 +21,7 @@ import com.example.cpen321application.ui.home.MainScreen
 import com.example.cpen321application.ui.home.MainViewModel
 import com.example.cpen321application.ui.auth.AuthViewModel
 import com.example.cpen321application.ui.auth.ConnectionInfoViewModel
+import com.example.cpen321application.ui.penalty.PenaltyViewModel
 import com.example.cpen321application.ui.timer.TimerViewModel
 import com.example.cpen321application.ui.websocket.WebSocketViewModel
 
@@ -28,6 +29,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
     private val authViewModel: AuthViewModel by viewModels()
     private val timerViewModel: TimerViewModel by viewModels()
+    private val penaltyViewModel: PenaltyViewModel by viewModels()
     private val webSocketViewModel: WebSocketViewModel by viewModels()
     private val connectionInfoViewModel: ConnectionInfoViewModel by viewModels()
 
@@ -38,14 +40,15 @@ class MainActivity : ComponentActivity() {
             CPEN321ApplicationTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    // the timer page is black edge to edge, including behind the system bars
-                    containerColor = if (viewModel.screen == Screen.TIMER) Color.Black
+                    // the timer and penalty pages are black edge to edge, including behind the system bars
+                    containerColor = if (viewModel.screen == Screen.TIMER || timerViewModel.finished) Color.Black
                     else MaterialTheme.colorScheme.background
                 ) { innerPadding ->
                     MainScreen(
                         viewModel = viewModel,
                         authViewModel = authViewModel,
                         timerViewModel = timerViewModel,
+                        penaltyViewModel = penaltyViewModel,
                         webSocketViewModel = webSocketViewModel,
                         connectionInfoViewModel = connectionInfoViewModel,
                         modifier = Modifier.padding(innerPadding)

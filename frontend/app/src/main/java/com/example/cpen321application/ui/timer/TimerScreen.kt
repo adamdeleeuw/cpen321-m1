@@ -1,6 +1,5 @@
 package com.example.cpen321application.ui.timer
 
-import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
@@ -19,15 +18,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.WindowCompat
+import com.example.cpen321application.ui.theme.LightSystemBarIcons
 
 private val ControlSize = 88.dp
 
@@ -119,22 +116,5 @@ private fun ControlButton(
         modifier = Modifier.size(ControlSize)
     ) {
         Text(text = label, fontSize = 17.sp, fontWeight = FontWeight.Medium)
-    }
-}
-
-/** the page is black whatever the system theme, so the status/navigation icons must be light */
-@Composable
-private fun LightSystemBarIcons() {
-    val view = LocalView.current
-    DisposableEffect(view) {
-        val controller = WindowCompat.getInsetsController((view.context as Activity).window, view)
-        val wasLightStatus = controller.isAppearanceLightStatusBars
-        val wasLightNavigation = controller.isAppearanceLightNavigationBars
-        controller.isAppearanceLightStatusBars = false
-        controller.isAppearanceLightNavigationBars = false
-        onDispose {
-            controller.isAppearanceLightStatusBars = wasLightStatus
-            controller.isAppearanceLightNavigationBars = wasLightNavigation
-        }
     }
 }
