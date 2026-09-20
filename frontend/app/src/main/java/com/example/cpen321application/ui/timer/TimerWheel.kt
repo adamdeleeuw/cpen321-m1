@@ -1,8 +1,5 @@
 package com.example.cpen321application.ui.timer
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +20,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
@@ -37,8 +33,13 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 private val RowHeight = 52.dp
+private val WheelWidth = 56.dp
+private val BandShape = RoundedCornerShape(18.dp)
 private const val ROWS_PER_SIDE = 3
 private const val ROW_STEP_RADIANS = 25 * PI / 180 // how far each row is turned around the drum
+
+/** the picker's full height, so the page can hold one stage height across both of its modes. */
+internal val TimerPickerHeight = RowHeight * (2 * ROWS_PER_SIDE + 1)
 
 /**
  * spec: the hours / minutes / seconds pickers side by side, sharing one glass band that
@@ -47,16 +48,7 @@ private const val ROW_STEP_RADIANS = 25 * PI / 180 // how far each row is turned
 @Composable
 fun TimerPicker(viewModel: TimerViewModel, modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(RowHeight)
-                .background(
-                    Brush.verticalGradient(listOf(TimerColors.GlassTop, TimerColors.GlassBottom)),
-                    RoundedCornerShape(14.dp)
-                )
-                .border(BorderStroke(1.dp, TimerColors.GlassEdge), RoundedCornerShape(14.dp))
-        )
+        Box(modifier = Modifier.fillMaxWidth().height(RowHeight).glassSurface(BandShape))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             TimerWheel(count = 24, selected = viewModel.hours, label = "hr") { viewModel.hours = it }
             TimerWheel(count = 60, selected = viewModel.minutes, label = "min") { viewModel.minutes = it }
@@ -95,7 +87,7 @@ private fun TimerWheel(
             flingBehavior = rememberSnapFlingBehavior(state),
             // padding lets the first and last numbers scroll all the way to the centre row
             contentPadding = PaddingValues(vertical = RowHeight * ROWS_PER_SIDE),
-            modifier = Modifier.width(64.dp).height(RowHeight * (2 * ROWS_PER_SIDE + 1))
+            modifier = Modifier.width(WheelWidth).height(TimerPickerHeight)
         ) {
             items(count) { index ->
                 Box(
@@ -108,7 +100,9 @@ private fun TimerWheel(
                     Text(
                         text = "%02d".format(index),
                         color = TimerColors.Digits,
-                        fontSize = 34.sp,
+                        // sits under the page title rather than level with it, and leaves the
+                        // glass band room to read as a surface the digits rest on
+                        fontSize = 28.sp,
                         fontWeight = FontWeight.Medium
                     )
                 }
