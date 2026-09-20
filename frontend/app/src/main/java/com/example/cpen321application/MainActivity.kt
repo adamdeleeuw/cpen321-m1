@@ -11,6 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.example.cpen321application.ui.home.Screen
+import com.example.cpen321application.ui.home.watercolorWash
 import com.example.cpen321application.ui.theme.CPEN321ApplicationTheme
 import java.net.HttpURLConnection
 import java.net.URL
@@ -38,11 +39,17 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CPEN321ApplicationTheme {
+                // both the dark pages and the home watercolour run edge to edge, behind the system bars
+                val darkPage = viewModel.screen == Screen.TIMER || timerViewModel.finished
+                val home = viewModel.screen == Screen.HOME && !timerViewModel.finished
+
                 Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    // the timer and penalty pages are black edge to edge, including behind the system bars
-                    containerColor = if (viewModel.screen == Screen.TIMER || timerViewModel.finished) Color.Black
-                    else MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize().let { if (home) it.watercolorWash() else it },
+                    containerColor = when {
+                        darkPage -> Color.Black
+                        home -> Color.Transparent // the wash behind the Scaffold shows through
+                        else -> MaterialTheme.colorScheme.background
+                    }
                 ) { innerPadding ->
                     MainScreen(
                         viewModel = viewModel,

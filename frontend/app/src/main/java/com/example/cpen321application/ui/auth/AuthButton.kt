@@ -1,16 +1,16 @@
 package com.example.cpen321application.ui.auth
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.example.cpen321application.ui.home.HomeButton
+import com.example.cpen321application.ui.home.HomeColors
 
 /**
  * spec: auth section of the home screen. shows sign-in status, the
@@ -22,22 +22,21 @@ fun AuthButton(viewModel: AuthViewModel, modifier: Modifier = Modifier) {
 
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
 
-        Button(
+        HomeButton(
+            text = if (viewModel.isSignedIn) "Sign out" else "Sign in/Sign up with Google",
             onClick = {
                 if (viewModel.isSignedIn) viewModel.signOut() else viewModel.signIn(context)
             },
-            enabled = !viewModel.isLoading,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = if (viewModel.isSignedIn) "Sign out" else "Sign in/Sign up with Google",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-            )
-        }
+            enabled = !viewModel.isLoading
+        )
 
         viewModel.errorMessage?.let {
-            Text(text = it, color = MaterialTheme.colorScheme.error)
+            Text(
+                text = it,
+                color = HomeColors.Error,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 8.dp)
+            )
         }
     }
 }

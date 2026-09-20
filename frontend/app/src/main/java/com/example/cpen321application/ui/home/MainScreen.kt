@@ -2,12 +2,9 @@ package com.example.cpen321application.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,13 +13,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.cpen321application.ui.auth.AuthButton
 import com.example.cpen321application.ui.auth.AuthViewModel
 import com.example.cpen321application.ui.auth.ConnectionInfoScreen
 import com.example.cpen321application.ui.auth.ConnectionInfoViewModel
 import com.example.cpen321application.ui.penalty.PenaltyScreen
 import com.example.cpen321application.ui.penalty.PenaltyViewModel
+import com.example.cpen321application.ui.theme.DarkSystemBarIcons
 import com.example.cpen321application.ui.timer.TimerButton
 import com.example.cpen321application.ui.timer.TimerScreen
 import com.example.cpen321application.ui.timer.TimerViewModel
@@ -53,6 +50,9 @@ fun MainScreen(
     LaunchedEffect(authViewModel.isSignedIn) {
         viewModel.screen = if (authViewModel.isSignedIn) Screen.AUTH else Screen.HOME
     }
+
+    // the home wash is light in either system theme, so its text can't take the theme's colours
+    val onWatercolor = viewModel.screen == Screen.HOME && !timerViewModel.finished
 
     Column(modifier = modifier.fillMaxSize()) {
         if (timerViewModel.finished) {
@@ -88,26 +88,22 @@ fun MainScreen(
                 modifier = Modifier.weight(1f)
             )
         } else {
+            DarkSystemBarIcons()
+
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically)
             ) {
-                Spacer(modifier = Modifier.height(32.dp))
-
                 AuthButton(viewModel = authViewModel)
-
-                Spacer(modifier = Modifier.height(32.dp))
 
                 WebSocketButton(onClick = {
                     webSocketViewModel.connect()
                     viewModel.screen = Screen.WEBSOCKET
                 })
-
-                Spacer(modifier = Modifier.height(32.dp))
 
                 TimerButton(onClick = { viewModel.screen = Screen.TIMER })
             }
@@ -116,7 +112,7 @@ fun MainScreen(
         authViewModel.notice?.let {
             Text(
                 text = it,
-                color = MaterialTheme.colorScheme.error,
+                color = if (onWatercolor) HomeColors.Error else MaterialTheme.colorScheme.error,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .fillMaxWidth()
