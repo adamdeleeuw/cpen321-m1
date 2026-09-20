@@ -22,6 +22,7 @@ import com.example.cpen321application.ui.auth.AuthViewModel
 import com.example.cpen321application.ui.auth.ConnectionInfoScreen
 import com.example.cpen321application.ui.auth.ConnectionInfoViewModel
 import com.example.cpen321application.ui.timer.TimerButton
+import com.example.cpen321application.ui.timer.TimerScreen
 import com.example.cpen321application.ui.timer.TimerViewModel
 import com.example.cpen321application.ui.websocket.WebSocketButton
 import com.example.cpen321application.ui.websocket.WebSocketScreen
@@ -31,7 +32,7 @@ import com.example.cpen321application.ui.websocket.WebSocketViewModel
  * spec: root screen. HOME has 3 buttons (auth, websocket, timer); signing in
  * navigates to the AUTH page (connection info), signing out or a 401 returns home.
  * the websocket button opens the WEBSOCKET page (live pixel canvas) and connects;
- * its Back button disconnects and returns home.
+ * its Back button disconnects and returns home. the timer button opens the TIMER page.
  * the "ATTENTION" notice is pinned to the bottom after an unauthorized attempt.
  */
 @Composable
@@ -65,6 +66,12 @@ fun MainScreen(
                 },
                 modifier = Modifier.weight(1f)
             )
+        } else if (viewModel.screen == Screen.TIMER) {
+            TimerScreen(
+                viewModel = timerViewModel,
+                onBack = { viewModel.screen = Screen.HOME },
+                modifier = Modifier.weight(1f)
+            )
         } else {
             Column(
                 modifier = Modifier
@@ -87,7 +94,7 @@ fun MainScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                TimerButton(viewModel = timerViewModel)
+                TimerButton(onClick = { viewModel.screen = Screen.TIMER })
             }
         }
 

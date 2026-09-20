@@ -9,13 +9,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun TimerButton(viewModel: TimerViewModel) {
+fun TimerButton(onClick: () -> Unit) {
     Button(
-        onClick = { viewModel.timer() },
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
-            text = "Start Timer",
+            text = "Timer",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
         )
