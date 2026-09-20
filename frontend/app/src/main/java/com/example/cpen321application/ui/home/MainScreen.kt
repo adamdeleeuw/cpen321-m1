@@ -24,11 +24,14 @@ import com.example.cpen321application.ui.auth.ConnectionInfoViewModel
 import com.example.cpen321application.ui.timer.TimerButton
 import com.example.cpen321application.ui.timer.TimerViewModel
 import com.example.cpen321application.ui.websocket.WebSocketButton
+import com.example.cpen321application.ui.websocket.WebSocketScreen
 import com.example.cpen321application.ui.websocket.WebSocketViewModel
 
 /**
  * spec: root screen. HOME has 3 buttons (auth, websocket, timer); signing in
  * navigates to the AUTH page (connection info), signing out or a 401 returns home.
+ * the websocket button opens the WEBSOCKET page (live pixel canvas) and connects;
+ * its Back button disconnects and returns home.
  * the "ATTENTION" notice is pinned to the bottom after an unauthorized attempt.
  */
 @Composable
@@ -53,6 +56,15 @@ fun MainScreen(
                 onBack = { viewModel.screen = Screen.HOME },
                 modifier = Modifier.weight(1f)
             )
+        } else if (viewModel.screen == Screen.WEBSOCKET) {
+            WebSocketScreen(
+                viewModel = webSocketViewModel,
+                onBack = {
+                    webSocketViewModel.disconnect()
+                    viewModel.screen = Screen.HOME
+                },
+                modifier = Modifier.weight(1f)
+            )
         } else {
             Column(
                 modifier = Modifier
@@ -62,16 +74,16 @@ fun MainScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(text = "Socket Status: ${webSocketViewModel.socketStatus}")
-                Text(text = "Timer Running: ${timerViewModel.timerRunning}")
-
                 Spacer(modifier = Modifier.height(32.dp))
 
                 AuthButton(viewModel = authViewModel)
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                WebSocketButton(viewModel = webSocketViewModel)
+                WebSocketButton(onClick = {
+                    webSocketViewModel.connect()
+                    viewModel.screen = Screen.WEBSOCKET
+                })
 
                 Spacer(modifier = Modifier.height(32.dp))
 

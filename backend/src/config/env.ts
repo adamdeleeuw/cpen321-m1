@@ -31,6 +31,8 @@ const SESSION_TTL_SECONDS = 30 * 60; // 30 min sessions (no refresh yet)
 export const env = {
   port,
   sessionTtlSeconds: SESSION_TTL_SECONDS,
+  // course-provided pixel stream; overridable so tests can point at a local fake
+  pixelServerUrl: process.env.PIXEL_SERVER_URL ?? 'wss://8.229.22.124',
   // web/backend client id; must equal the server client id the android app requests tokens for
   get googleClientId(): string {
     return requireEnv('GOOGLE_BACKEND_CLIENT_ID');

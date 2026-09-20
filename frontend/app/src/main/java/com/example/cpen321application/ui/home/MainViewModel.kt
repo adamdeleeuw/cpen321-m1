@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 
 /** spec: which page is showing, plus placeholder state for the socket and timer features. */
-enum class Screen { HOME, AUTH }
+enum class Screen { HOME, AUTH, WEBSOCKET }
 
 class MainViewModel : ViewModel() {
     var screen by mutableStateOf(Screen.HOME)

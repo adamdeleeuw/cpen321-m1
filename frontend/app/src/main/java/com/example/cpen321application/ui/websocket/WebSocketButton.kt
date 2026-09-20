@@ -9,9 +9,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun WebSocketButton(viewModel: WebSocketViewModel) {
+fun WebSocketButton(onClick: () -> Unit) {
     Button(
-        onClick = { viewModel.webSocket() },
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
