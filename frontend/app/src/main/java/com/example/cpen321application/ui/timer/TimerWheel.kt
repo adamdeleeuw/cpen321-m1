@@ -102,7 +102,7 @@ private fun TimerWheel(
                         color = TimerColors.Digits,
                         // sits under the page title rather than level with it, and leaves the
                         // glass band room to read as a surface the digits rest on
-                        fontSize = 28.sp,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Medium
                     )
                 }
