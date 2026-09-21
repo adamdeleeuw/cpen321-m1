@@ -6,17 +6,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.lerp
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
 import kotlin.math.PI
 import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.roundToInt
 import kotlin.math.sin
 
 private const val STRIPES = 12
 private const val POST_WIDTH = 0.014f
+private const val STAY_WIDTH = 0.007f
 private const val NET_SPACING = 0.035f
+private const val NET_WIDTH = 0.004f
+
+// the goal is seen at a 3/4 angle: the right post is the near one, so its foot swings toward the
+// ball and down the screen, and the frame runs back to ground anchors up and to the right.
+private const val NEAR_POST_LEAN = 0.05f
+private const val NEAR_POST_DROP = 0.08f
+private val DEPTH = Offset(0.07f, -0.05f)
+
 private const val WOBBLE_AMPLITUDE = 0.012f
 private const val WOBBLE_RATE = 45f
 private const val GUIDE_SECONDS = 0.28f // short on purpose: aiming stays a skill
@@ -62,23 +74,31 @@ private fun DrawScope.drawGoal(viewModel: PenaltyViewModel) {
     val right = PenaltyWorld.BAR_RIGHT
     val ground = PenaltyWorld.GROUND_Y
 
+    // the frame's corners, and the anchors the goal is pegged down at behind them
+    val farTop = Offset(left, PenaltyWorld.BAR_Y)
+    val farFoot = Offset(left, ground)
+    val nearTop = Offset(right, PenaltyWorld.BAR_Y)
+    val nearFoot = Offset(right - NEAR_POST_LEAN, ground + NEAR_POST_DROP)
+    val farAnchor = farFoot + DEPTH
+    val nearAnchor = nearFoot + DEPTH
+
     // goal line across the whole pitch
     drawLine(PenaltyColors.Line, Offset(-1f, ground), Offset(2f, ground), strokeWidth = 0.008f)
 
-    // net: a light grid between the posts, from the bar down to the ground
-    var x = left
-    while (x <= right) {
-        drawLine(PenaltyColors.Net, Offset(x, PenaltyWorld.BAR_Y), Offset(x, ground), strokeWidth = 0.004f)
-        x += NET_SPACING
-    }
-    var y = PenaltyWorld.BAR_Y
-    while (y <= ground) {
-        drawLine(PenaltyColors.Net, Offset(left, y), Offset(right, y), strokeWidth = 0.004f)
-        y += NET_SPACING
-    }
+    // net: four panels enclosing the goal, each a mesh across its quad (a-b top, d-c bottom)
+    drawNetPanel(farTop, nearTop, nearAnchor, farAnchor) // roof and back, one sloping sheet
+    drawNetPanel(farTop, farTop, farAnchor, farFoot)     // far side, a triangle under the post
+    drawNetPanel(nearTop, nearTop, nearAnchor, nearFoot) // near side
 
-    drawLine(PenaltyColors.Post, Offset(left, PenaltyWorld.BAR_Y), Offset(left, ground), strokeWidth = POST_WIDTH)
-    drawLine(PenaltyColors.Post, Offset(right, PenaltyWorld.BAR_Y), Offset(right, ground), strokeWidth = POST_WIDTH)
+    // white stays running back from the frame to the anchors, and the bar joining them
+    drawStay(farTop, farAnchor)
+    drawStay(nearTop, nearAnchor)
+    drawStay(farFoot, farAnchor)
+    drawStay(nearFoot, nearAnchor)
+    drawStay(farAnchor, nearAnchor)
+
+    drawLine(PenaltyColors.Post, farTop, farFoot, strokeWidth = POST_WIDTH)
+    drawLine(PenaltyColors.Post, nearTop, nearFoot, strokeWidth = POST_WIDTH)
 
     // the crossbar, wobbling and glowing for a moment after a hit
     val wobble = viewModel.wobble
@@ -97,6 +117,27 @@ private fun DrawScope.drawGoal(viewModel: PenaltyViewModel) {
         size = Size(right - left, PenaltyWorld.BAR_THICKNESS)
     )
 }
+
+/**
+ * a net mesh across the quad a-b-c-d, where a-b is the top edge and d-c the bottom, so a-d and
+ * b-c are the sides. an edge may be a point, which fans the strands out from that corner.
+ */
+private fun DrawScope.drawNetPanel(a: Offset, b: Offset, c: Offset, d: Offset) {
+    strandFractions(b - a, c - d).forEach { t -> drawNetLine(lerp(a, b, t), lerp(d, c, t)) }
+    strandFractions(d - a, c - b).forEach { t -> drawNetLine(lerp(a, d, t), lerp(b, c, t)) }
+}
+
+/** evenly spaced fractions from 0 to 1, enough to keep the mesh near NET_SPACING */
+private fun strandFractions(edge: Offset, opposite: Offset): List<Float> {
+    val count = (max(edge.getDistance(), opposite.getDistance()) / NET_SPACING).roundToInt().coerceAtLeast(1)
+    return (0..count).map { it.toFloat() / count }
+}
+
+private fun DrawScope.drawNetLine(from: Offset, to: Offset) =
+    drawLine(PenaltyColors.Net, from, to, strokeWidth = NET_WIDTH)
+
+private fun DrawScope.drawStay(from: Offset, to: Offset) =
+    drawLine(PenaltyColors.Post, from, to, strokeWidth = STAY_WIDTH)
 
 private fun DrawScope.drawShadow(viewModel: PenaltyViewModel) {
     val height = (PenaltyWorld.GROUND_Y - PenaltyWorld.BALL_RADIUS - viewModel.ballY).coerceAtLeast(0f)

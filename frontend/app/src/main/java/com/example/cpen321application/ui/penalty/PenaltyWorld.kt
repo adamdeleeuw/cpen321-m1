@@ -15,7 +15,7 @@ internal object PenaltyWorld {
 
     const val GROUND_Y = 1.3f
     const val BALL_RADIUS = 0.04f
-    const val SPOT_X = 0.14f
+    const val SPOT_X = 0.24f // clear of the left edge, so a pull-back never runs out of room
     const val SPOT_Y = GROUND_Y - BALL_RADIUS
 
     // the crossbar: a horizontal bar seen from the side, thickness centred on BAR_Y
