@@ -82,8 +82,9 @@ private fun DrawScope.drawGoal(viewModel: PenaltyViewModel) {
     val farAnchor = farFoot + DEPTH
     val nearAnchor = nearFoot + DEPTH
 
-    // goal line across the whole pitch
-    drawLine(PenaltyColors.Line, Offset(-1f, ground), Offset(2f, ground), strokeWidth = 0.008f)
+    // goal line: painted on the grass through both post feet, so it recedes with the goal
+    val along = (nearFoot - farFoot) / (nearFoot - farFoot).getDistance()
+    drawLine(PenaltyColors.Line, farFoot - along * 2f, nearFoot + along * 2f, strokeWidth = 0.008f)
 
     // net: four panels enclosing the goal, each a mesh across its quad (a-b top, d-c bottom)
     drawNetPanel(farTop, nearTop, nearAnchor, farAnchor) // roof and back, one sloping sheet
