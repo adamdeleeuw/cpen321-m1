@@ -1,0 +1,34 @@
+# Production overrides for the GCP VM, layered on docker-compose.yml:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# Caddy is the only thing reachable from the internet. It gets a Let's Encrypt
+# certificate for SITE_ADDRESS and forwards everything (HTTP and the /ws/pixels
+# WebSocket) to the backend over the private compose network.
+
+services:
+  backend:
+    # no host port: only Caddy, on the compose network, can reach the backend
+    ports: !reset []
+    expose:
+      - "3000"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # sslip.io resolves 136-67-54-50.sslip.io to 136.67.54.50, which gives us a
+      # hostname Let's Encrypt can issue a certificate for without buying a domain
+      SITE_ADDRESS: ${SITE_ADDRESS:-136-67-54-50.sslip.io}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data # certificates and ACME account; losing this re-issues certs
+      - caddy-config:/config
+    depends_on:
+      - backend
+
+volumes:
+  caddy-data:
+  caddy-config:

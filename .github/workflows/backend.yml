@@ -1,0 +1,64 @@
+# Backend CI/CD: on every push to main that touches the backend or its
+# deployment config, typecheck and test; if that passes, SSH into the GCP VM and
+# run scripts/deploy-backend.sh. Pull requests only get the test job.
+#
+# Repo secrets (Settings -> Secrets and variables -> Actions):
+#   VM_HOST     the VM's static IP (136.67.54.50)
+#   VM_USER     the VM account that owns ~/cpen321-m1 and is in the docker group
+#   VM_SSH_KEY  private key whose public half is in the VM's ssh-keys metadata
+
+name: Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "deploy/**"
+      - "docker-compose*.yml"
+      - "scripts/deploy-backend.sh"
+      - ".github/workflows/backend.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+  workflow_dispatch: # "Run workflow" button, for redeploying by hand
+
+# never run two deploys at once; a newer push waits for the running one
+concurrency:
+  group: backend-deploy
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://136-67-54-50.sslip.io/health
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          command_timeout: 15m
+          script: bash ~/cpen321-m1/scripts/deploy-backend.sh

@@ -1,0 +1,6 @@
+# Production reverse proxy (see docker-compose.prod.yml).
+# A hostname here makes Caddy obtain and renew a publicly trusted certificate
+# automatically. WebSocket upgrades are proxied without extra config.
+{$SITE_ADDRESS} {
+    reverse_proxy backend:3000
+}

@@ -8,7 +8,10 @@ const NOT_FOUND = 404;
 
 export function createApp(): Express {
   const app = express();
-  app.set('trust proxy', 'loopback'); // trust 127.0.0.1/::1 (where Caddy proxy sits)
+  // trust X-Forwarded-For from Caddy: loopback when it runs on the host, a private
+  // docker network address when it runs in compose. the backend port is never
+  // public in production, so only Caddy can set that header.
+  app.set('trust proxy', ['loopback', 'uniquelocal']);
 
   // middleware: allows for defined req.body access
   app.use(express.json());

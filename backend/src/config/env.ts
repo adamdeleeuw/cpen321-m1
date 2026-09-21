@@ -5,7 +5,8 @@
  */
 import dotenv from 'dotenv';
 
-dotenv.config({ path: '.env.dev' });
+// first file wins per variable; real env vars (e.g. from docker compose) win over both
+dotenv.config({ path: ['.env.dev', '.env'], quiet: true });
 
 const rawPort = process.env.PORT;
 const port =

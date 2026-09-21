@@ -2,7 +2,9 @@
 sdk.dir=/path/to/Android/sdk
 
 # Backend base URL baked into the APK at build time.
-API_BASE_URL=https://10.0.2.2:3443
+#   Deployed backend (GCP VM):   https://136-67-54-50.sslip.io
+#   Backend on your machine:     http://10.0.2.2:3000  (emulator; debug builds only)
+API_BASE_URL=https://136-67-54-50.sslip.io
 
 # Google OAuth client ID.
 GOOGLE_CLIENT_ID=

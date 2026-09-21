@@ -33,7 +33,7 @@ Install the following before the frontend or backend setup steps:
    ```
    Set at least:
    - `sdk.dir`: path to your Android SDK. Android Studio usually writes this the first time you open `frontend/`. On Mac it is often `sdk.dir=/Users/<username>/Library/Android/sdk`.
-   - `API_BASE_URL`: backend URL baked into the APK. Use `http://10.0.2.2:3000` for the emulator (`10.0.2.2` is the host machine). For a physical device on the same Wi-Fi, use `http://<your-lan-ip>:3000`.
+   - `API_BASE_URL`: backend URL baked into the APK. Use `https://136-67-54-50.sslip.io` for the deployed backend on the GCP VM. For a backend on your own machine, use `http://10.0.2.2:3000` on the emulator (`10.0.2.2` is the host machine; plain HTTP is only allowed to it in debug builds).
 
 
 ### Build and Run
@@ -64,9 +64,12 @@ cp backend/.env.example backend/.env
 ```
 
 Set at least:
+- `GOOGLE_BACKEND_CLIENT_ID`: the web/backend OAuth client ID the Android app requests ID tokens for.
 - `JWT_SECRET`: a long random string used to sign auth tokens.
-- `MONGODB_URI`: only needed for local development (default in `.env.example` assumes MongoDB on `localhost:27017`). Ignored when running via Docker Compose.
+- `SERVER_PUBLIC_IP`: the IP shown on the connection info screen (`136.67.54.50` on the VM).
 - `PORT` (optional): defaults to `3000` if unset.
+
+When running locally with Node, `backend/.env.dev` is read first, then `backend/.env`.
 
 
 ### Option 1: Run locally
@@ -120,6 +123,15 @@ Set at least:
    ```bash
    docker compose down
    ```
+
+## Deployment (GCP VM)
+
+The backend runs on the VM `cpen321-backend-vm-adam` (static IP `136.67.54.50`) and is served at **https://136-67-54-50.sslip.io**.
+
+- `docker-compose.prod.yml` adds [Caddy](https://caddyserver.com) in front of the backend. Caddy gets a Let's Encrypt certificate automatically and proxies HTTP and the `/ws/pixels` WebSocket to the backend, which is not exposed on its own.
+- Every push to `main` that touches `backend/`, `deploy/`, the compose files or the deploy script runs `.github/workflows/backend.yml`. That workflow typechecks, tests and builds, then SSHes into the VM and runs `scripts/deploy-backend.sh`.
+- To deploy by hand: `gcloud compute ssh --zone us-west1-a cpen321-backend-vm-adam --project cpen321-m1-508304`, then `bash ~/cpen321-m1/scripts/deploy-backend.sh`.
+- Secrets live only in `~/cpen321-m1/backend/.env` on the VM, never in git or GitHub.
 
 ## Additional Setup
 

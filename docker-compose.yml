@@ -1,24 +1,29 @@
 # Requires Docker Compose v2.24+ for the `env_file: required:` syntax below.
+#
+# Local development: `docker compose up --build -d` (or ./scripts/run-backend.sh).
+# Production (the GCP VM) layers docker-compose.prod.yml on top; see
+# scripts/deploy-backend.sh.
 
 name: cpen321-project
 
 services:
   backend:
     build: ./backend
+    restart: unless-stopped
     # Published on all interfaces so a physical Android device on the same Wi-Fi
-    # can reach it. Emulators use http://10.0.2.2:3000/api/ either way.
+    # can reach it. Emulators use http://10.0.2.2:3000 either way.
     ports:
       - "3000:3000"
     env_file:
       - path: ./backend/.env
-    environment:
-      MONGODB_URI: mongodb://mongo:27017/cpen321
-    depends_on:
-      mongo:
-        condition: service_healthy
 
+  # Nothing in the backend talks to a database yet, so MongoDB only starts when
+  # asked for: `docker compose --profile db up -d`. Once the backend uses it, drop
+  # the profile, set MONGODB_URI=mongodb://mongo:27017/cpen321 on the backend and
+  # add `depends_on: mongo: condition: service_healthy`.
   mongo:
     image: mongo:7
+    profiles: [db]
     restart: unless-stopped
     volumes:
       - mongo-data:/data/db
