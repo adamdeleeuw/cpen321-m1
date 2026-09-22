@@ -48,7 +48,7 @@ fun ConnectionInfoScreen(
         InfoRow("Client IP", info?.clientIp ?: pending)
         InfoRow("Server time", info?.serverTime ?: pending)
         InfoRow("Client time", viewModel.clientTime.ifEmpty { pending })
-        InfoRow("Your name", viewModel.myName ?: pending)
+        InfoRow("Server Owner", viewModel.myName ?: pending)
         InfoRow("Google user", user?.let { "${it.firstName} ${it.lastName}" } ?: pending)
 
         viewModel.errorMessage?.let {
