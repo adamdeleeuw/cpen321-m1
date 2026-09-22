@@ -1,138 +1,136 @@
 # Adam's Implementation of M1
 
-_Keep this README up to date with the steps required to build and run the frontend and backend (including any scripts, config files, and environment variables). TAs ill follow these instructions._
+## Overview
 
-## Requirements
+An Android app with three buttons on its home screen:
 
-Install the following before the frontend or backend setup steps:
+| Button | What it does |
+|--------|--------------|
+| **Sign in/Sign up with Google** | Signs in with Google, trades the Google ID token for a backend session, then opens a page showing the server's public IP, the client's IP, server time, client time, a name returned by the backend (`Adam de Leeuw`) and the signed-in Google user's name. |
+| **Connect to WebSocket** | Opens a 16×16 canvas and paints pixels live as they arrive from the course pixel server (relayed through this project's backend). |
+| **Timer** | A countdown timer. When it hits zero, a "hit the crossbar" penalty mini-game takes over the screen until you win it. Runs entirely on the device, with no backend involved. |
 
-- [git](https://git-scm.com/install/)
+The frontend is a Kotlin / Jetpack Compose Android app (`frontend/`). The backend is a Node.js / TypeScript Express server (`backend/`).
 
+## Architecture
 
---- 
+In production the backend runs in Docker on a GCP VM behind **Caddy**, which terminates HTTPS with a publicly trusted **Let's Encrypt** certificate for `136-67-54-50.sslip.io`. Port 3000 is never exposed to the internet; only Caddy can reach the backend, over the private Docker network.
 
-## Frontend Setup
+```mermaid
+sequenceDiagram
+    autonumber
+    participant App as Android app
+    participant G as Google
+    participant C as Caddy (VM :443)
+    participant B as Backend (:3000, private)
+    participant P as Course pixel server
 
-### Requirements
+    Note over C: On startup: Caddy gets a Let's Encrypt<br/>certificate for 136-67-54-50.sslip.io (ACME, port 80)
 
-- [Android Studio](https://developer.android.com/studio) (latest version)
-- [Java 17](https://adoptium.net/temurin/releases/?version=17)
-- [Android SDK](https://developer.android.com/studio#command-tools) with API level 36+ (Android 16)
+    App->>G: Sign in with Google (Credential Manager)
+    G-->>App: Google ID token
 
-### Setup
+    Note over App,C: HTTPS: TLS handshake
+    App->>C: TCP :443, ClientHello (SNI 136-67-54-50.sslip.io)
+    C-->>App: ServerHello + Let's Encrypt certificate
+    Note over App: Verifies certificate against<br/>Android's trusted CAs
+    App->>C: Key exchange, encrypted channel ready
 
-1. **Open project**: Open the `frontend/` directory in Android Studio
-2. **Sync Gradle**: Android Studio will automatically prompt you to sync the project. Click "Sync Now". You can also manually run `cd frontend && ./gradlew build` to trigger the sync and download the necessary dependencies.
-3. **Configure Android SDK**: Ensure you have Android SDK 36 installed.
-4. **Set up emulator/device**:
-   - Create a new AVD (Android Virtual Device) by selecting Pixel 9 as the device and Android Baklava (API level 36) as the system image.
-   - Alternatively, connect a physical Android device running Android 16 (API level 36).
-5. **Setup app config**: Copy the example file, then fill in local values:
-   ```bash
-   cp frontend/local.properties.example frontend/local.properties
-   ```
-   Set at least:
-   - `sdk.dir`: path to your Android SDK. Android Studio usually writes this the first time you open `frontend/`. On Mac it is often `sdk.dir=/Users/<username>/Library/Android/sdk`.
-   - `API_BASE_URL`: backend URL baked into the APK. Use `https://136-67-54-50.sslip.io` for the deployed backend on the GCP VM. For a backend on your own machine, use `http://10.0.2.2:3000` on the emulator (`10.0.2.2` is the host machine; plain HTTP is only allowed to it in debug builds).
+    App->>C: POST /api/auth/google { idToken } (encrypted)
+    C->>B: Forwards as plain HTTP (inside Docker network)
+    B->>G: Verify ID token
+    B-->>C: Session JWT
+    C-->>App: Session JWT (encrypted)
 
+    App->>C: GET /api/connection-info (encrypted)
+    C->>B: HTTP
+    B-->>C: Server IP, client IP, server time
+    C-->>App: Response (encrypted)
 
-### Build and Run
-
-- **Debug build**: Click the green play button in the toolbar, to compile the code, package a debug APK, and install it on the connected device or running emulator. Alternatively, from the project root, run `./scripts/run-frontend.sh`.
-- **Release build**: Go to Build -> Generate Signed App Bundle or APK -> APK. Follow the on-screen instructions to create a key, and select the "release" build variant. You will then have to manually install the generated APK on your device or the running emulator.
-
-
-### Backend Configuration
-
-Ensure the backend server is running and update the base URL in the app configuration if needed.
-
----
-## Backend Setup
-
-You can run the backend in one of two ways:
-* Locally via Node.js 
-* Via Docker Compose
-
-Both ways use the same `backend/.env` file (see below).
-
-### Environment configuration
-
-From the project root:
-
-```bash
-cp backend/.env.example backend/.env
+    App->>C: WSS upgrade /ws/pixels (encrypted)
+    C->>B: WebSocket upgrade
+    B->>P: WSS wss://8.229.22.124
+    P-->>B: Pixel messages
+    B-->>C: Forwards each pixel
+    C-->>App: Pixels (encrypted)
 ```
 
-Set at least:
-- `GOOGLE_BACKEND_CLIENT_ID`: the web/backend OAuth client ID the Android app requests ID tokens for.
-- `JWT_SECRET`: a long random string used to sign auth tokens.
-- `SERVER_PUBLIC_IP`: the IP shown on the connection info screen (`136.67.54.50` on the VM).
-- `PORT` (optional): defaults to `3000` if unset.
+Release builds of the app only allow HTTPS. Debug builds additionally allow plain HTTP to `10.0.2.2` so the app can talk to a backend running locally.
 
-When running locally with Node, `backend/.env.dev` is read first, then `backend/.env`.
+## Run the app with the APK
 
+1. Open Android Studio.
+2. Click the three dots in the top right corner and select **Virtual Device Manager**.
+3. Add a new **Pixel 9** (Android 17.0 "CinnamonBun") device. This image includes Google Play.
+4. Start the Pixel 9.
+5. On the Pixel 9, **sign in to Google with your Google account**. Button 1 uses the account signed in on the device.
+6. Drag the APK onto the emulator window to install it (or run `adb install -r app.apk`).
+7. Swipe up from the bottom to open the app menu and select **CPEN321 Application**.
 
-### Option 1: Run locally
+The APK points at the deployed backend, `https://136-67-54-50.sslip.io`. Any Google account can sign in.
 
-**Requirements:** 
-- [Node.js](https://nodejs.org/en/download/) 22+
-- [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 10+
+## Build and deploy
 
-**Setup:** 
-1. Install dependencies:
+Clone the repo:
 
-   ```bash
-   cd backend
-   npm install
-   ```
+```bash
+git clone git@github.com:adamdeleeuw/cpen321-m1.git
+cd cpen321-m1
+```
 
-2. **Development** (TypeScript with auto-reload):
+### Backend
 
-   ```bash
-   npm run dev
-   ```
+```bash
+cd backend
+cp .env.example .env
+```
 
-3. **Production build** (optional):
+Fill in `backend/.env`:
 
-   ```bash
-   npm run build
-   npm start
-   ```
+```dotenv
+GOOGLE_BACKEND_CLIENT_ID=<your Google Web client ID>.apps.googleusercontent.com
+JWT_SECRET=<a random secret>
+SERVER_PUBLIC_IP=<127.0.0.1 locally, or the VM's public IP>
+```
 
-### Option 2: Run with Docker Compose
+**Local:**
 
-**Requirements:** 
-- [Docker](https://docs.docker.com/desktop/setup/install) and [Docker Compose](https://docs.docker.com/desktop/setup/install) v2.24+
-- [curl](https://curl.se/download.html)
+```bash
+npm install
+npm run build && npm run start     # serves plain HTTP on http://localhost:3000
+```
 
-**Setup**
-1. **Start** (from the project root):
+**VM:** the VM runs the backend and Caddy with Docker (Docker must be installed, and `backend/.env` must exist on the VM). The deploy script syncs the clone to `origin/main`, starts both containers and waits for `https://136-67-54-50.sslip.io/health` to respond:
 
-   ```bash
-   ./scripts/run-backend.sh
-   ```
+```bash
+~/cpen321-m1/scripts/deploy-backend.sh
+```
 
-   Or run Compose directly:
+In practice you don't run this by hand. The GitHub Actions workflow `.github/workflows/backend.yml` runs on every push to `main`: it typechecks, tests and builds the backend, then SSHes into the VM and runs `deploy-backend.sh`. This is the intended way to deploy the HTTPS server.
 
-   ```bash
-   docker compose up --build -d
-   ```
+### Frontend
 
-2. **Stop**:
+```bash
+cd frontend
+cp local.properties.example local.properties
+```
 
-   ```bash
-   docker compose down
-   ```
+Fill in `frontend/local.properties`:
 
-## Deployment (GCP VM)
+```properties
+sdk.dir=<path to your Android SDK>
+GOOGLE_CLIENT_ID=<your Google Web client ID>.apps.googleusercontent.com
 
-The backend runs on the VM `cpen321-backend-vm-adam` (static IP `136.67.54.50`) and is served at **https://136-67-54-50.sslip.io**.
+# pick one:
+API_BASE_URL=http://10.0.2.2:3000             # backend running locally
+API_BASE_URL=https://136-67-54-50.sslip.io    # backend deployed on the VM
+```
 
-- `docker-compose.prod.yml` adds [Caddy](https://caddyserver.com) in front of the backend. Caddy gets a Let's Encrypt certificate automatically and proxies HTTP and the `/ws/pixels` WebSocket to the backend, which is not exposed on its own.
-- Every push to `main` that touches `backend/`, `deploy/`, the compose files or the deploy script runs `.github/workflows/backend.yml`. That workflow typechecks, tests and builds, then SSHes into the VM and runs `scripts/deploy-backend.sh`.
-- To deploy by hand: `gcloud compute ssh --zone us-west1-a cpen321-backend-vm-adam --project cpen321-m1-508304`, then `bash ~/cpen321-m1/scripts/deploy-backend.sh`.
-- Secrets live only in `~/cpen321-m1/backend/.env` on the VM, never in git or GitHub.
+Then build and run:
 
-## Additional Setup
+```bash
+./gradlew build
+```
 
-_Please specify any other additional setup steps non-specific to either frontend nor backend_
+1. Go to **Tools → Device Manager** and set up the Pixel 9 emulator as described in [Run the app with the APK](#run-the-app-with-the-apk).
+2. Click **Run app** (the green play button) in Android Studio.
