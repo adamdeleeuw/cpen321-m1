@@ -6,7 +6,7 @@ An Android app with three buttons on its home screen:
 
 | Button | What it does |
 |--------|--------------|
-| **Sign in/Sign up with Google** | Signs in with Google, trades the Google ID token for a backend session, then opens a page showing the server's public IP, the client's IP, server time, client time, a name returned by the backend (`Adam de Leeuw`) and the signed-in Google user's name. |
+| **Sign in/Sign up with Google** | Signs in with Google, trades the Google ID token for a backend session, then opens a page showing the server's public IP, the client's IP, server time, client time, the name of the server owner returned by the backend (`Adam de Leeuw`) and the signed-in Google user's name. |
 | **Connect to WebSocket** | Opens a 16×16 canvas and paints pixels live as they arrive from the course pixel server (relayed through this project's backend). |
 | **Timer** | A countdown timer. When it hits zero, a "hit the crossbar" penalty mini-game takes over the screen until you win it. Runs entirely on the device, with no backend involved. |
 
