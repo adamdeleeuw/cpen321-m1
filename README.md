@@ -39,6 +39,7 @@ sequenceDiagram
     App->>C: POST /api/auth/google { idToken } (encrypted)
     C->>B: Forwards as plain HTTP (inside Docker network)
     B->>G: Verify ID token
+    G-->>B: Verification response
     B-->>C: Session JWT
     C-->>App: Session JWT (encrypted)
 
