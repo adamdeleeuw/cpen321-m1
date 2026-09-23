@@ -52,3 +52,9 @@ google-services.json
 
 # Verity — snapshots of analyzed files (machine state, never commit)
 .verity/.snapshot/
+
+# Course pdfs
+pdfs/
+
+# Gradle outputs
+frontend/app/release/
